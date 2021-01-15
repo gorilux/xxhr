@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.18)
 
 project(xxhr)
 
+include(FetchContent)
+
 set(BOOST_VERSION 1.72.0)
 set(BOOST_COMPONENTS    
     system    
@@ -26,8 +28,15 @@ if (NOT TARGET OpenSSL::headers)
 endif()
 
 
+FetchContent_Declare(
+    better-enums
+    GIT_REPOSITORY https://github.com/gorilux/better-enums.git
+)
+
+FetchContent_MakeAvailable(better-enums)
+
 add_library(xxhr INTERFACE)
 
-target_include_directories ( xxhr INTERFACE xxhr/)
+target_include_directories ( xxhr INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} )
 
-target_link_libraries( xxhr INTERFACE Boost::boost Threads::Threads OpenSSL::headers)
+target_link_libraries( xxhr INTERFACE better-enums Boost::boost Threads::Threads OpenSSL::headers)
