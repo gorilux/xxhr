@@ -39,4 +39,4 @@ add_library(xxhr INTERFACE)
 
 target_include_directories ( xxhr INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} )
 
-target_link_libraries( xxhr INTERFACE better-enums Boost::boost Threads::Threads OpenSSL::headers)
+target_link_libraries( xxhr INTERFACE better-enums Boost::boost Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
