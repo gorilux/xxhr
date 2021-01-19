@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <memory>
 
+
+
 #include "auth.hpp"
 #include "body.hpp"
 #include "cookies.hpp"
@@ -29,7 +31,7 @@ class Session {
   void SetHeader(const Header& header);
   void SetTimeout(const Timeout& timeout);
   void SetAuth(const Authentication& auth);
-  void SetDigest(const Digest& auth);
+  // void SetDigest(const Digest& auth);
   void SetMultipart(Multipart&& multipart);
   void SetMultipart(const Multipart& multipart);
   void SetRedirect(const bool& redirect);
@@ -45,7 +47,7 @@ class Session {
   void SetOption(const Header& header);
   void SetOption(const Timeout& timeout);
   void SetOption(const Authentication& auth);
-  void SetOption(const Digest& auth);
+  // void SetOption(const Digest& auth);
   void SetOption(Multipart&& multipart);
   void SetOption(const Multipart& multipart);
   void SetOption(const bool& redirect);
@@ -72,6 +74,6 @@ class Session {
 
 } // namespace xxhr
 
-#include <xxhr/impl/session.hpp>
+
 
 #endif

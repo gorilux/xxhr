@@ -33,14 +33,15 @@ namespace xxhr {
     using str = std::string;
 
     public:
+    Impl(){}      
+
 
     void SetUrl(const Url& url);
     void SetParameters(const Parameters& parameters);
     void SetParameters(Parameters&& parameters);
     void SetHeader(const Header& header);
     void SetTimeout(const Timeout& timeout);
-    void SetAuth(const Authentication& auth);
-    void SetDigest(const Digest& auth);
+    void SetAuth(const Authentication& auth);    
 
     void SetMultipart(Multipart&& multipart);
     void SetMultipart(const Multipart& multipart);
@@ -115,7 +116,7 @@ namespace xxhr {
     Url url_;
     Parameters parameters_; // TODO: implement parameters
     Cookies cookies_;
-    Header headers;
+    Header headers;    
 
     // XXX: SHould be used in query open if not none.
     std::optional<Authentication> auth_;
@@ -163,13 +164,7 @@ namespace xxhr {
     //Some old browser might need this, instead of open with pwd : xhr.call<val>("setRequestHeader", 
     //  "Authorization", std::string("Basic ") + util::encode64(auth.GetAuthString());
   }
-
-  void Session::Impl::SetDigest(const Digest& auth) {
-    auth_ = auth;
-    //Some old browser might need this, instead of open with pwd : xhr.call<val>("setRequestHeader", 
-    //  "Authorization", std::string("Basic ") + util::encode64(auth.GetAuthString());
-  }
-
+  
   void Session::Impl::SetMultipart(Multipart&& multipart) {
     val formdata = val::global("FormData").new_();
 

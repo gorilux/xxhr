@@ -14,6 +14,9 @@ find_package(Threads REQUIRED)
 
 find_package(OpenSSL REQUIRED)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Some container classes rely on openssl headers, but not on linking to
 # the library proper.
 if (NOT TARGET OpenSSL::headers)
@@ -35,8 +38,10 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(better-enums)
 
-add_library(xxhr INTERFACE)
+file(GLOB_RECURSE lib_xxhr_sources "./xxhr/*.cpp" "./xxhr/**/*.h"  "./xxhr/**/*.hpp" "./xxhr/**/*.cpp")
 
-target_include_directories ( xxhr INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} )
+add_library(xxhr STATIC ${lib_xxhr_sources} )
 
-target_link_libraries( xxhr INTERFACE better-enums Boost::boost Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
+target_include_directories ( xxhr PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+
+target_link_libraries( xxhr PUBLIC better-enums Boost::boost Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
