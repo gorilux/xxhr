@@ -8,6 +8,7 @@ using tcp      = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 namespace ssl  = boost::asio::ssl;      // from <boost/asio/ssl.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
+
 using plain_or_tls = std::variant<std::monostate, tcp::socket, ssl::stream<tcp::socket>>;
 
 
@@ -193,7 +194,7 @@ void Session::Impl::on_read(boost::system::error_code ec, std::size_t bytes_tran
         on_shutdown(ec);
     }
 
-    if (response_headers.find("Location") != response_headers.end()) {
+    if (res.result_int() >= 300 && res.result_int() <= 310 && response_headers.find("Location") != response_headers.end()) {
         SetUrl(response_headers["Location"]);
         if ((redirect_) && (number_of_redirects > 0)) {
             --number_of_redirects;
@@ -241,9 +242,9 @@ void Session::Impl::on_timeout(const boost::system::error_code& ec) {
     }
 }
 bool Session::Impl::generateAuthentication(boost::string_view authenticate) {
-    if (auth_.username.empty() || auth_.password.empty() || !req_[boost::beast::http::field::authorization].empty()) {
-        return false;
-    }
+    // if (auth_.username.empty() || auth_.password.empty() || !req_[boost::beast::http::field::authorization].empty()) {
+    //     return false;
+    // }
     if (boost::ifind_first(authenticate, "digest")) {
         return generateDigestAuth(authenticate, boost::string_view());
     } else {
@@ -260,10 +261,13 @@ bool Session::Impl::generateBasicAuthentication() {
     return true;
 }
 bool Session::Impl::generateDigestAuth(boost::string_view authenticate, boost::string_view body) {
-    Digest authenticator(authenticate, auth_.username, auth_.password,
-                         req_.target(), to_string(req_.method()), body);
-    if (authenticator.generateAuthorization()) {
-        req_.set(boost::beast::http::field::authorization, authenticator.authorization());
+    
+    if(!digest_.authenticate(authenticate)){
+        return false; 
+    }
+
+    if (digest_.generateAuthorization(req_.target(), to_string(req_.method()), body)) {
+        req_.set(boost::beast::http::field::authorization, digest_.authorization());
         return true;
     }
     return false;
@@ -298,6 +302,12 @@ void Session::Impl::SetAuth(const Authentication& auth) {
     // ss << "Basic " << util::encode64(auth.GetAuthString());
     // req_.set(http::field::authorization, ss.str());
     auth_ = auth;
+    generateBasicAuthentication();
+}
+
+void Session::Impl::SetDigest(Digest&& digest) 
+{
+    std::swap(digest_, digest);
 }
 
 void Session::Impl::SetMultipart(Multipart&& multipart) {
@@ -345,7 +355,7 @@ void Session::Impl::SetMultipart(Multipart&& multipart) {
     }
 
     req_.body() = body.str();
-    std::cout << body.str() << std::endl;
+    //std::cout << body.str() << std::endl;
 }
 
 void Session::Impl::SetMultipart(const Multipart& multipart) {
@@ -395,10 +405,27 @@ void Session::Impl::do_one_request(http::verb method) {
         target << "?" << url_parts_.parameters << parameters_.content;
     }
     req_.target(target.str());
-    req_.set(http::field::host, url_parts_.host);
+
+    
+    std::stringstream host_port;
+    host_port << url_parts_.host;
+    if(url_parts_.port != "80" && url_parts_.port != "443"){
+        host_port << ":" << url_parts_.port;
+    }
+
+
+    req_.set(http::field::host, host_port.str() ) ;
     req_.set(http::field::user_agent, "xxhr/v0.0.1");  //TODO: add a way to override from user and make a version macro
     req_.prepare_payload();                            // Compute Content-Length and related headers
 
+
+
+    if(digest_.is_initialized() && digest_.generateAuthorization(req_.target(), to_string(req_.method()), boost::string_view())){
+        req_.set(boost::beast::http::field::authorization, digest_.authorization());
+    }
+
+    
+    //if(auto itr = digest_auth_cache.find())
     if (url_parts_.https()) {
         stream_.emplace<ssl::stream<tcp::socket>>(ioc, ctx);
     } else {

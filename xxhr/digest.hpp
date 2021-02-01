@@ -36,16 +36,37 @@ inline std::string encode(Ch* data, size_t size) {
  */
 class Digest {
 public:
-    Digest(boost::string_view www_authenticate, boost::string_view username,
-           boost::string_view password, boost::string_view uri,
-           boost::string_view method, boost::string_view responseBody) noexcept
-        : m_authenticate{www_authenticate}, m_username{username}, m_password{password}, m_uri{uri}, m_method{method}, m_body{responseBody}, m_qop{None} {}
+    Digest( boost::string_view username,
+           boost::string_view password ) noexcept
+        : m_username{username}, m_password{password}, m_qop{None} {}
+    
+    Digest() {}
 
-    bool generateAuthorization() {
-        // Nonce and realm are both required for digest athentication.
+    bool is_initialized() const {
+        if(m_username.empty() || m_password.empty() || m_authenticate.empty())
+        {
+            return false;
+        }
+        return true;
+    }
+    bool authenticate(boost::string_view www_authenticate){
+        
+        m_authenticate = www_authenticate; 
+
         if (!findNonce() || !findRealm()) {
             return false;
-        }        
+        }
+
+        
+        return true;
+    }
+    bool generateAuthorization(boost::string_view uri, boost::string_view method, boost::string_view responseBody) {
+
+        m_uri = uri;
+        m_method = method;
+        m_body = responseBody;
+        
+        // Nonce and realm are both required for digest athentication.       
         findOpaque();
         findQop();
         findAlgorithm();
@@ -116,7 +137,11 @@ private:
     static std::string updateNonceCount() {
         static unsigned int s_nonceCount{};
         std::stringstream   ss;
-        ss << std::setfill('0') << std::setw(8) << ++s_nonceCount;
+        if(++s_nonceCount > 99999999)
+        {
+            s_nonceCount = 1;
+        }
+        ss << std::setfill('0') << std::setw(8) << s_nonceCount;
         return ss.str();
     }
 

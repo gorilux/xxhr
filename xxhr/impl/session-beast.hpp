@@ -51,7 +51,7 @@ public:
     void SetHeader(const Header& header);
     void SetTimeout(const Timeout& timeout);
     void SetAuth(const Authentication& auth);
-    void SetDigest(const Digest& auth);
+    void SetDigest(Digest&& auth);
 
     void SetMultipart(Multipart&& multipart);
     void SetMultipart(const Multipart& multipart);
@@ -126,6 +126,7 @@ private:
     plain_or_tls              stream_;
     boost::beast::flat_buffer buffer_;  // (Must persist between reads)    
     Authentication            auth_;
+    Digest                    digest_;
 
     std::shared_ptr<http::response_parser<http::string_body>> res_parser_ = std::make_shared<http::response_parser<http::string_body>>();
 

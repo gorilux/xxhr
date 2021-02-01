@@ -15,6 +15,8 @@ void Session::SetParameters(Parameters&& parameters) { pimpl_->SetParameters(std
 void Session::SetHeader(const Header& header) { pimpl_->SetHeader(header); }
 void Session::SetTimeout(const Timeout& timeout) { pimpl_->SetTimeout(timeout); }
 void Session::SetAuth(const Authentication& auth) { pimpl_->SetAuth(auth); }
+
+void Session::SetDigest(Digest&& auth) { pimpl_->SetDigest(std::move(auth)); }
 void Session::SetMultipart(const Multipart& multipart) { pimpl_->SetMultipart(multipart); }
 void Session::SetMultipart(Multipart&& multipart) { pimpl_->SetMultipart(std::move(multipart)); }
 void Session::SetRedirect(const bool& redirect) { pimpl_->SetRedirect(redirect); }
@@ -35,6 +37,7 @@ void Session::SetOption(const MaxRedirects& max_redirects) { pimpl_->SetMaxRedir
 void Session::SetOption(const Cookies& cookies) { pimpl_->SetCookies(cookies); }
 void Session::SetOption(const Body& body) { pimpl_->SetBody(body); }
 void Session::SetOption(Body&& body) { pimpl_->SetBody(std::move(body)); }
+void Session::SetOption(Digest&& auth) { pimpl_->SetDigest(std::move(auth)); }
 
 
 
