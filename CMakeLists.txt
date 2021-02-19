@@ -6,7 +6,8 @@ include(FetchContent)
 
 set(BOOST_VERSION 1.72.0)
 set(BOOST_COMPONENTS    
-    system    
+    system   
+    regex 
 )
 
 find_package(Boost ${BOOST_VERSION} REQUIRED COMPONENTS ${BOOST_COMPONENTS})
@@ -44,4 +45,4 @@ add_library(xxhr STATIC ${lib_xxhr_sources} )
 
 target_include_directories ( xxhr PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
-target_link_libraries( xxhr PUBLIC better-enums Boost::boost Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries( xxhr PUBLIC better-enums Boost::boost Boost::regex Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
